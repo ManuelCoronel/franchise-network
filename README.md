@@ -6,6 +6,7 @@ This microservice manages **franchises**, their **branches**, and the **inventor
 - A **Franchise** has an `id` and `name`, and contains multiple branches.
 - A **Branch** belongs to a franchise and has an `id`, `name`, and a list of inventories.
 - **Inventory** is a many-to-many relationship between **Branch** and **Product** (a product can belong to multiple branches, and a branch can have multiple products).
+- **Product** has an id and name.
 
 The service is developed with **Spring Boot + WebFlux**, reactive programming with **Project Reactor**, and exposes REST endpoints for CRUD operations.
 
