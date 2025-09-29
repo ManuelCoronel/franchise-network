@@ -1,6 +1,15 @@
+
+plugins {
+    id 'java'
+}
+
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':validator')
+	implementation project(':r2dbc-postgresql')
+	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+	implementation project(':jpa-repository')
 	implementation project(':reactive-web')
     implementation project(':model')
     implementation project(':usecase')
@@ -8,6 +17,27 @@ dependencies {
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13"
+
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+            include '**/*'
+        }
+    }
+}
+
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.com.bancolombia.MainAplication'
+        )
+    }
 }
 
 tasks.register('explodedJar', Copy) {
@@ -19,6 +49,8 @@ jar {
     // To disable the *-plain.jar
     enabled = false
 }
+
+
 
 bootJar {
     // Sets output jar name
