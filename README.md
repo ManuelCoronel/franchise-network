@@ -1,47 +1,290 @@
-# Proyecto Base Implementando Clean Architecture
+# Franchise Microservice
 
-## Antes de Iniciar
+##  Overview
+This microservice manages **franchises**, their **branches**, and the **inventory** of products associated with those branches.
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
+- A **Franchise** has an `id` and `name`, and contains multiple branches.
+- A **Branch** belongs to a franchise and has an `id`, `name`, and a list of inventories.
+- **Inventory** is a many-to-many relationship between **Branch** and **Product** (a product can belong to multiple branches, and a branch can have multiple products).
 
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+The service is developed with **Spring Boot + WebFlux**, reactive programming with **Project Reactor**, and exposes REST endpoints for CRUD operations.
 
-# Arquitectura
+---
 
-![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
+## ⚙️ Technologies
+- Java 21
+- Spring Boot 3+
+- Spring WebFlux
+- R2DBC
+- Reactor
+- Gradle
+- Docker
+- OpenAPI/Swagger (for API documentation)
 
-## Domain
+---
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+## 🔧 Environment Variables
 
-## Usecases
+The service requires the following environment variables to connect to the database:
 
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+| Variable                     | Description                  | Example    |
+|-------------------------------|------------------------------|------------|
+| `SPRING_DATASOURCE_HOST`      | Database host                | `localhost` |
+| `SPRING_DATASOURCE_USERNAME`  | Database username            | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD`  | Database password            | `admin` |
 
-## Infrastructure
 
-### Helpers
+You can configure them in your IDE (Run/Debug Configurations) or export them in your terminal:
 
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
+```
+export SPRING_DATASOURCE_HOST=localhost
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=admin
+```
 
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+## ️ Running Locally
 
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/franchise-microservice.git
+   cd franchise-microservice
 
-### Driven Adapters
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+2. **Run the service**
+```
+   ./gradlew clean bootRun
+```
 
-### Entry Points
+# --- Franchise ---
+# Create franchise
+Request
+```
+curl --location 'localhost:8080/api/franchise' \
+--header 'Content-Type: application/json' \
+--data '{"name":"COCA COLA - branch"}'
+```
+Response
+```JSON
+{
+"success": true,
+"message": "Successful operation",
+"data": {
+    "id": 28,
+    "franchiseId": 1,
+    "name": "COCA COLA - branch"
+},
+"timestamp": "2025-09-29T07:08:42.0190428"
+}
+```
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+# Update franchise name
+Request
+```
+curl --location --request PUT 'localhost:8081/api/franchise' \
+--header 'Content-Type: application/json' \
+--data '{
+   "franchiseId":1,
+   "name":"BBC"
+}
+```
 
-## Application
+Response
+```JSON
+{
+   "success": true,
+   "message": "Successful operation",
+   "data": {
+      "id": 1,
+      "name": "BBC"
+   },
+   "timestamp": "2025-09-29T07:14:12.9503015"
+}
+```
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
+# --- Branch ---
 
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+# Create branch
+Request
+```
+curl --location 'localhost:8080/api/branch' \
+--header 'Content-Type: application/json' \
+--data '{"franchiseId":233,"name":"COCA COLA - branch"}'
+```
+Response
+
+```JSON
+{
+   "success": true,
+   "message": "Successful operation",
+   "data": {
+      "id": 28,
+      "franchiseId": 1,
+      "name": "COCA COLA - branch"
+   },
+   "timestamp": "2025-09-29T07:08:42.0190428"
+}
+```
+
+# Update branch name
+Request
+```
+curl --location --request PUT 'localhost:8081/api/franchise' \
+--header 'Content-Type: application/json' \
+--data '{
+"franchiseId":1,
+"name":"BBC"
+
+}
+```
+
+Response
+
+```JSON
+{
+   "success": true,
+   "message": "Successful operation",
+   "data": {
+      "id": 1,
+      "name": "BBC"
+   },
+   "timestamp": "2025-09-29T07:14:12.9503015"
+}
+```
+
+# --- Product ---
+# Create product
+
+Request
+
+```
+curl --location 'localhost:8080/api/product' \
+--header 'Content-Type: application/json' \
+--data '{"name":"COCA COLA"}'
+```
+Response
+```JSON
+{
+    "success": true,
+    "message": "Successful operation",
+    "data": {
+        "id": 25,
+        "name": "COCA COLA"
+    },
+    "timestamp": "2025-09-29T07:09:28.4869371"
+}
+```
+
+# Update product name
+
+Request
+```
+curl --location --request PUT 'localhost:8080/api/product' \
+--header 'Content-Type: application/json' \
+--data '{"productId":25,"name":"COCA COLA 3"}'
+```
+
+Response
+```JSON
+{
+    "success": true,
+    "message": "Successful operation",
+    "data": {
+        "id": 25,
+        "name": "COCA COLA 3"
+    },
+    "timestamp": "2025-09-29T07:17:30.7158432"
+}
+```
+
+# --- Inventory ---
+
+
+# Create inventory (associate product with branch)
+
+Request
+
+```
+curl --location 'localhost:8080/api/inventory' \
+--header 'Content-Type: application/json' \
+--data '{"branchId":1,"productId":25}'
+```
+
+Response
+```JSON
+{
+"success": true,
+"message": "Successful operation",
+"data": {
+    "id": 8,
+    "branchId": 1,
+    "productId": 25,
+    "stock": 0
+},
+"timestamp": "2025-09-29T07:09:35.3079413"
+}
+```
+
+
+# Delete inventory relation (remove product from branch)
+
+Request
+```
+curl --location --request DELETE 'localhost:8080/api/inventory/branch/1/product/25'
+```
+
+# Update stock
+
+Request
+```
+curl --location --request PATCH 'localhost:8080/api/inventory' \
+--header 'Content-Type: application/json' \
+--data '{"branchId":2,"productId":3,"stock":27}'
+```
+Response
+
+```JSON
+{
+    "success": true,
+    "message": "Successful operation",
+    "data": {
+        "id": 3,
+        "branchId": 2,
+        "productId": 3,
+        "stock": 27
+    },
+    "timestamp": "2025-09-29T07:12:36.7091738"
+}
+```
+
+
+# Get top products by stock for a franchise
+
+Request
+```
+curl --location 'localhost:8080/api/inventory/top-products/1'
+```
+
+Response
+```JSON
+{
+"success": true,
+"message": "Successful operation",
+"data": [
+{
+   "branchId": 1,
+   "branchName": "Sucursal Norte",
+   "productId": 1,
+   "productName": "Coca-Cola",
+   "stock": 50
+},
+{
+   "branchId": 2,
+   "branchName": "BBC sucursal",
+   "productId": 3,
+   "productName": "Agua",
+   "stock": 27
+}
+],
+"timestamp": "2025-09-29T08:29:12.9461147"
+}
+```
