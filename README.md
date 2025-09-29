@@ -47,8 +47,8 @@ export SPRING_DATASOURCE_PASSWORD=admin
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/franchise-microservice.git
-   cd franchise-microservice
+   git https://github.com/ManuelCoronel/franchise-network.git
+   cd franchise-network
 
 
 2. **Run the service**
